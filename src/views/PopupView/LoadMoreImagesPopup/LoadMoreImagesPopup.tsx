@@ -9,17 +9,21 @@ import { ImageData } from '../../../store/labels/types';
 import { PopupActions } from '../../../logic/actions/PopupActions';
 import { ImageDataUtil } from '../../../utils/ImageDataUtil';
 
+// 加载更多图片的弹窗组件
 interface IProps {
     addImageData: (imageData: ImageData[]) => any;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 const LoadMoreImagesPopup: React.FC<IProps> = ({ addImageData }) => {
+    // 使用react-dropzone库，获取拖拽上传的文件
     const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
         accept: {
             'image/*': ['.jpeg', '.png']
         }
     });
 
+    // 点击“Load”按钮，将上传的图片添加到store中
     const onAccept = () => {
         if (acceptedFiles.length > 0) {
             addImageData(acceptedFiles.map((fileData: File) => ImageDataUtil.createImageDataFromFileData(fileData)));
@@ -27,10 +31,12 @@ const LoadMoreImagesPopup: React.FC<IProps> = ({ addImageData }) => {
         }
     };
 
+    // 点击“Cancel”按钮，关闭弹窗
     const onReject = () => {
         PopupActions.close();
     };
 
+    // 根据上传的文件数量，返回不同的内容
     const getDropZoneContent = () => {
         if (acceptedFiles.length === 0)
             return <>

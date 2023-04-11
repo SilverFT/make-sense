@@ -1,46 +1,101 @@
-import React, {PropsWithChildren} from 'react';
+import React, { PropsWithChildren, useState } from 'react';
 import './ImagesDropZone.scss';
-import {useDropzone,DropzoneOptions} from 'react-dropzone';
-import {TextButton} from '../../Common/TextButton/TextButton';
-import {ImageData} from '../../../store/labels/types';
-import {connect} from 'react-redux';
-import {addImageData, updateActiveImageIndex} from '../../../store/labels/actionCreators';
-import {AppState} from '../../../store';
-import {ProjectType} from '../../../data/enums/ProjectType';
-import {PopupWindowType} from '../../../data/enums/PopupWindowType';
-import {updateActivePopupType, updateProjectData} from '../../../store/general/actionCreators';
-import {ProjectData} from '../../../store/general/types';
-import {ImageDataUtil} from '../../../utils/ImageDataUtil';
+import { useDropzone, DropzoneOptions } from 'react-dropzone';
+import { TextButton } from '../../Common/TextButton/TextButton';
+import { ImageData } from '../../../store/labels/types';
+import { connect } from 'react-redux';
+import { addImageData, updateActiveImageIndex } from '../../../store/labels/actionCreators';
+import { AppState } from '../../../store';
+import { ProjectType } from '../../../data/enums/ProjectType';
+import { PopupWindowType } from '../../../data/enums/PopupWindowType';
+import { updateActivePopupType, updateProjectData } from '../../../store/general/actionCreators';
+import { ProjectData } from '../../../store/general/types';
+import { ImageDataUtil } from '../../../utils/ImageDataUtil';
 import { sortBy } from 'lodash';
+import { LabelsSelector } from '../../../store/selectors/LabelsSelector';
+import { updateLabelNames } from '../../../store/labels/actionCreators'
+import { LabelUtil } from '../../../utils/LabelUtil';
+import { LabelName } from '../../../store/labels/types';
+import {
+    updateActiveLabelId,
+    updateFirstLabelCreatedFlag,
+    updateHighlightedLabelId,
+    updateImageDataById
+} from '../../../store/labels/actionCreators';
+import { store } from '../../..';
+import { LabelRect } from '../../../store/labels/types';
 
 interface IProps {
+    updateLabelNamesAction: (labels: LabelName[]) => any;
     updateActiveImageIndexAction: (activeImageIndex: number) => any;
     addImageDataAction: (imageData: ImageData[]) => any;
     updateProjectDataAction: (projectData: ProjectData) => any;
     updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
     projectData: ProjectData;
 }
-
+let pushFile: File[] = [];
 const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
-    const {acceptedFiles, getRootProps, getInputProps} = useDropzone({
+    const [labelNames, setLabelNames] = useState(LabelsSelector.getLabelNames());
+    const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
         accept: {
             'image/*': ['.jpeg', '.png']
         }
     } as DropzoneOptions);
 
     const startEditor = (projectType: ProjectType) => {
-        if (acceptedFiles.length > 0) {
-            const files = sortBy(acceptedFiles, (item: File) => item.name)
-            props.updateProjectDataAction({
-                ...props.projectData,
-                type: projectType
-            });
-            props.updateActiveImageIndexAction(0);
-            props.addImageDataAction(files.map((file:File) => ImageDataUtil
-                .createImageDataFromFileData(file)));
-            props.updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
-        }
+        // if (acceptedFiles.length > 0) {
+        const files = sortBy(pushFile, (item: File) => item.name)
+        props.updateProjectDataAction({
+            ...props.projectData,
+            type: projectType
+        });
+        props.updateActiveImageIndexAction(0);
+        props.addImageDataAction(files.map((file: File) => ImageDataUtil
+            .createImageDataFromFileData(file)));
+        props.updateActivePopupTypeAction(PopupWindowType.INSERT_LABEL_NAMES);
+        // }
     };
+    function urlToFile(url) {
+        return fetch(url)
+            .then(res => res.blob())
+            .then(blob => new File([blob], url, { type: blob.type }))
+    }
+
+
+
+    window.addEventListener('message', (e) => {
+        const iframeData = JSON.parse(e.data);
+        console.log(iframeData);
+
+        if (iframeData.key == 'init') {
+
+            pushFile = iframeData.imgList;
+            Promise.all(pushFile.map(urlToFile)).then(tempFiles => {
+                pushFile = tempFiles;
+                startEditor(ProjectType.OBJECT_DETECTION);
+                const labelNamesData = [];
+                iframeData.labelName.forEach((item: string) => {
+                    labelNamesData.push(LabelUtil.createLabelName(item));
+                })
+                props.updateLabelNamesAction(labelNamesData);
+                console.log(labelNamesData);
+                props.updateActivePopupTypeAction(null)
+                console.log(iframeData);
+
+                iframeData.rectList.forEach((item: string, index: number) => {
+                    if (item != '') {
+                        const rectData = item.split('\n');
+                        console.log(rectData);
+                        rectData.forEach((item2: string) => {
+                            const itemRect = item2.split(' ')
+                            console.log(itemRect);
+                        })
+                    }
+                })
+
+            })
+        }
+    });
 
     const getDropZoneContent = () => {
         if (acceptedFiles.length === 0)
@@ -80,9 +135,9 @@ const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
     const startEditorWithObjectDetection = () => startEditor(ProjectType.OBJECT_DETECTION)
     const startEditorWithImageRecognition = () => startEditor(ProjectType.IMAGE_RECOGNITION)
 
-    return(
+    return (
         <div className='ImagesDropZone'>
-            <div {...getRootProps({className: 'DropZone'})}>
+            <div {...getRootProps({ className: 'DropZone' })}>
                 {getDropZoneContent()}
             </div>
             <div className='DropZoneButtons'>
@@ -102,6 +157,7 @@ const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
 };
 
 const mapDispatchToProps = {
+    updateLabelNamesAction: updateLabelNames,
     updateActiveImageIndexAction: updateActiveImageIndex,
     addImageDataAction: addImageData,
     updateProjectDataAction: updateProjectData,

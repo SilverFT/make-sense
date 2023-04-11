@@ -233,10 +233,17 @@ export class RectRenderEngine extends BaseRenderEngine {
         return RectUtil.scaleRect(rect, 1/scale);
     }
 
+    //添加矩形标注
     private addRectLabel = (rect: IRect) => {
         const activeLabelId = LabelsSelector.getActiveLabelNameId();
+        console.log("activeLabelId",activeLabelId);
+        
         const imageData: ImageData = LabelsSelector.getActiveImageData();
+        console.log("imageData",imageData);
+        
         const labelRect: LabelRect = LabelUtil.createLabelRect(activeLabelId, rect);
+        console.log("labelRect",labelRect);
+        
         imageData.labelRects.push(labelRect);
         store.dispatch(updateImageDataById(imageData.id, imageData));
         store.dispatch(updateFirstLabelCreatedFlag(true));

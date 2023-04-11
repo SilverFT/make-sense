@@ -91,6 +91,8 @@ const ImportLabelPopup: React.FC<IProps> = (
     });
 
     const onAccept = (type: LabelType) => {
+        console.log('importLabelPopup onAccept');
+        
         if (loadedLabelNames.length !== 0 && loadedImageData.length !== 0) {
             updateImageDataAction(loadedImageData);
             updateLabelNamesAction(loadedLabelNames);

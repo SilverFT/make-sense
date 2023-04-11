@@ -6,8 +6,8 @@ import {AppState} from '../../../store';
 import {connect} from 'react-redux';
 import {updateActivePopupType, updateProjectData} from '../../../store/general/actionCreators';
 import TextInput from '../../Common/TextInput/TextInput';
-import {ImageButton} from '../../Common/ImageButton/ImageButton';
-import {Settings} from '../../../settings/Settings';
+// import {ImageButton} from '../../Common/ImageButton/ImageButton';
+// import {Settings} from '../../../settings/Settings';
 import {ProjectData} from '../../../store/general/types';
 import DropDownMenu from './DropDownMenu/DropDownMenu';
 
@@ -27,19 +27,19 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
             .toLowerCase()
             .replace(' ', '-');
 
-        props.updateProjectDataAction({
-            ...props.projectData,
-            name: value
-        })
+        // props.updateProjectDataAction({
+        //     ...props.projectData,
+        //     name: value
+        // })
     };
 
-    const closePopup = () => props.updateActivePopupTypeAction(PopupWindowType.EXIT_PROJECT)
+    // const closePopup = () => props.updateActivePopupTypeAction(PopupWindowType.EXIT_PROJECT)
 
     return (
         <div className='TopNavigationBar'>
             <StateBar/>
             <div className='TopNavigationBarWrapper'>
-                <div className='NavigationBarGroupWrapper'>
+                {/* <div className='NavigationBarGroupWrapper'>
                     <div
                         className='Header'
                         onClick={closePopup}
@@ -51,27 +51,27 @@ const TopNavigationBar: React.FC<IProps> = (props) => {
                         />
                         Make Sense
                     </div>
-                </div>
+                </div> */}
                 <div className='NavigationBarGroupWrapper'>
                     <DropDownMenu/>
                 </div>
-                <div className='NavigationBarGroupWrapper middle'>
-                    <div className='ProjectName'>Project Name:</div>
+                {/* <div className='NavigationBarGroupWrapper middle'>
+                    <div className='ProjectName'>版本号:</div>
                     <TextInput
                         isPassword={false}
                         value={props.projectData.name}
                         onChange={onChange}
                         onFocus={onFocus}
                     />
-                </div>
-                <div className='NavigationBarGroupWrapper'>
+                </div> */}
+                {/* <div className='NavigationBarGroupWrapper'>
                     <ImageButton
                         image={'ico/github-logo.png'}
                         imageAlt={'github-logo.png'}
                         buttonSize={{width: 30, height: 30}}
                         href={Settings.GITHUB_URL}
                     />
-                </div>
+                </div> */}
             </div>
         </div>
     );

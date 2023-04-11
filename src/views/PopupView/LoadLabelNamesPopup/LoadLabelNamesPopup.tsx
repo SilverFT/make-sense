@@ -9,12 +9,12 @@ import { updateActivePopupType } from '../../../store/general/actionCreators';
 import { useDropzone } from 'react-dropzone';
 import { LabelName } from '../../../store/labels/types';
 import { YOLOUtils } from '../../../logic/import/yolo/YOLOUtils';
-import {LabelNamesNotUniqueError} from '../../../logic/import/yolo/YOLOErrors';
-import {NotificationUtil} from '../../../utils/NotificationUtil';
-import {NotificationsDataMap} from '../../../data/info/NotificationsData';
-import {Notification} from '../../../data/enums/Notification';
-import {submitNewNotification} from '../../../store/notifications/actionCreators';
-import {INotification} from '../../../store/notifications/types';
+import { LabelNamesNotUniqueError } from '../../../logic/import/yolo/YOLOErrors';
+import { NotificationUtil } from '../../../utils/NotificationUtil';
+import { NotificationsDataMap } from '../../../data/info/NotificationsData';
+import { Notification } from '../../../data/enums/Notification';
+import { submitNewNotification } from '../../../store/notifications/actionCreators';
+import { INotification } from '../../../store/notifications/types';
 
 interface IProps {
     updateActivePopupTypeAction: (activePopupType: PopupWindowType) => any;
@@ -73,7 +73,7 @@ const LoadLabelNamesPopup: React.FC<IProps> = (
                     src={'ico/box-opened.png'}
                 />
                 <p className='extraBold'>Loading of labels file was unsuccessful</p>
-                <p className='extraBold'>Try again</p>
+                <p className='extraBold'>再试一遍</p>
             </>;
         else if (acceptedFiles.length === 0)
             return <>
@@ -83,9 +83,9 @@ const LoadLabelNamesPopup: React.FC<IProps> = (
                     alt={'upload'}
                     src={'ico/box-opened.png'}
                 />
-                <p className='extraBold'>Drop labels file</p>
+                <p className='extraBold'>拖入标签文件</p>
                 <p>or</p>
-                <p className='extraBold'>Click here to select it</p>
+                <p className='extraBold'>单击此处进行选择</p>
             </>;
         else if (labelsList.length === 1)
             return <>
@@ -94,7 +94,7 @@ const LoadLabelNamesPopup: React.FC<IProps> = (
                     alt={'uploaded'}
                     src={'ico/box-closed.png'}
                 />
-                <p className='extraBold'>only 1 label found</p>
+                <p className='extraBold'>只找到1个标签</p>
             </>;
         else
             return <>
@@ -103,16 +103,14 @@ const LoadLabelNamesPopup: React.FC<IProps> = (
                     alt={'uploaded'}
                     src={'ico/box-closed.png'}
                 />
-                <p className='extraBold'>{labelsList.length} labels found</p>
+                <p className='extraBold'>{labelsList.length} 个标签</p>
             </>;
     };
 
     const renderContent = () => {
         return (<div className='LoadLabelsPopupContent'>
             <div className='Message'>
-                Load a text file with a list of labels you are planning to use. The names of
-                each label should be separated by new line. If you don&apos;t have a prepared file, no problem. You can
-                create your own list now.
+                加载包含计划使用的标签列表的文本文件。每个标签的名称应该用新行分隔。如果你没有准备好的文件，那没问题。您现在可以创建自己的列表。
             </div>
             <div {...getRootProps({ className: 'DropZone' })}>
                 {getDropZoneContent()}
@@ -122,12 +120,12 @@ const LoadLabelNamesPopup: React.FC<IProps> = (
 
     return (
         <GenericYesNoPopup
-            title={'Load file with labels description'}
+            title={'加载带有标签描述的文件'}
             renderContent={renderContent}
-            acceptLabel={'Start project'}
+            acceptLabel={'启动项目'}
             onAccept={onAccept}
             disableAcceptButton={labelsList.length === 0}
-            rejectLabel={'Back'}
+            rejectLabel={'返回'}
             onReject={onReject}
         />
     );

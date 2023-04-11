@@ -1,17 +1,18 @@
-import {AnnotationFormatType} from '../../data/enums/AnnotationFormatType';
-import {ImageData, LabelName, LabelRect} from '../../store/labels/types';
-import {ImageRepository} from '../imageRepository/ImageRepository';
+import { AnnotationFormatType } from '../../data/enums/AnnotationFormatType';
+import { ImageData, LabelName, LabelRect } from '../../store/labels/types';
+import { ImageRepository } from '../imageRepository/ImageRepository';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import {LabelsSelector} from '../../store/selectors/LabelsSelector';
-import {XMLSanitizerUtil} from '../../utils/XMLSanitizerUtil';
-import {ExporterUtil} from '../../utils/ExporterUtil';
-import {GeneralSelector} from '../../store/selectors/GeneralSelector';
-import {findIndex, findLast} from 'lodash';
-import {ISize} from '../../interfaces/ISize';
-import {NumberUtil} from '../../utils/NumberUtil';
-import {RectUtil} from '../../utils/RectUtil';
-import {Settings} from '../../settings/Settings';
+import { LabelsSelector } from '../../store/selectors/LabelsSelector';
+import { XMLSanitizerUtil } from '../../utils/XMLSanitizerUtil';
+import { ExporterUtil } from '../../utils/ExporterUtil';
+import { GeneralSelector } from '../../store/selectors/GeneralSelector';
+import { findIndex, findLast } from 'lodash';
+import { ISize } from '../../interfaces/ISize';
+import { NumberUtil } from '../../utils/NumberUtil';
+import { RectUtil } from '../../utils/RectUtil';
+import { Settings } from '../../settings/Settings';
+
 
 export class RectLabelsExporter {
     public static export(exportFormatType: AnnotationFormatType): void {
@@ -36,7 +37,7 @@ export class RectLabelsExporter {
             .forEach((imageData: ImageData) => {
                 const fileContent: string = RectLabelsExporter.wrapRectLabelsIntoYOLO(imageData);
                 if (fileContent) {
-                    const fileName : string = imageData.fileData.name.replace(/\.[^/.]+$/, '.txt');
+                    const fileName: string = imageData.fileData.name.replace(/\.[^/.]+$/, '.txt');
                     try {
                         zip.file(fileName, fileContent);
                     } catch (error) {
@@ -47,7 +48,7 @@ export class RectLabelsExporter {
             });
 
         try {
-            zip.generateAsync({type:'blob'})
+            zip.generateAsync({ type: 'blob' })
                 .then((content: Blob) => {
                     saveAs(content, `${ExporterUtil.getExportFileName()}.zip`);
                 });
@@ -58,8 +59,8 @@ export class RectLabelsExporter {
     }
 
     public static wrapRectLabelIntoYOLO(labelRect: LabelRect, labelNames: LabelName[], imageSize: ISize): string {
-        const snapAndFix = (value: number) => NumberUtil.snapValueToRange(value,0, 1).toFixed(6)
-        const classIdx: string = findIndex(labelNames, {id: labelRect.labelId}).toString()
+        const snapAndFix = (value: number) => NumberUtil.snapValueToRange(value, 0, 1).toFixed(6)
+        const classIdx: string = findIndex(labelNames, { id: labelRect.labelId }).toString()
         const rectCenter = RectUtil.getCenter(labelRect.rect)
         const rectSize = RectUtil.getSize(labelRect.rect)
         const rawBBox: number[] = [
@@ -87,9 +88,9 @@ export class RectLabelsExporter {
         imageSize: ISize,
         imageName: string
     ): string {
-        const labelName: LabelName = findLast(labelNames, {id: labelRect.labelId});
+        const labelName: LabelName = findLast(labelNames, { id: labelRect.labelId });
         const labelFields = [
-            !!labelName ? labelName.name: '',
+            !!labelName ? labelName.name : '',
             Math.round(labelRect.rect.x).toString(),
             Math.round(labelRect.rect.y).toString(),
             Math.round(labelRect.rect.width).toString(),
@@ -107,7 +108,24 @@ export class RectLabelsExporter {
 
         const labelNames: LabelName[] = LabelsSelector.getLabelNames();
         const image: HTMLImageElement = ImageRepository.getById(imageData.id);
-        const imageSize: ISize = {width: image.width, height: image.height}
+        const imageSize: ISize = { width: image.width, height: image.height }
+        const labelRectsString: string[] = imageData.labelRects
+            .filter((labelRect: LabelRect) => labelRect.labelId !== null)
+            .map((labelRect: LabelRect) => {
+                return RectLabelsExporter.wrapRectLabelIntoYOLO(labelRect, labelNames, imageSize)
+            });
+        return labelRectsString.join('\n');
+    }
+
+
+    public static wrapRectLabelsIntoJson(imageData: ImageData): string {
+        if (imageData.labelRects.length === 0 || !imageData.loadStatus)
+            return null;
+        console.log(imageData);
+        
+        const labelNames: LabelName[] = LabelsSelector.getLabelNames();
+        const image: HTMLImageElement = ImageRepository.getById(imageData.id);
+        const imageSize: ISize = { width: image.width, height: image.height }
         const labelRectsString: string[] = imageData.labelRects
             .filter((labelRect: LabelRect) => labelRect.labelId !== null)
             .map((labelRect: LabelRect) => {
@@ -121,7 +139,7 @@ export class RectLabelsExporter {
         LabelsSelector.getImagesData().forEach((imageData: ImageData) => {
             const fileContent: string = RectLabelsExporter.wrapImageIntoVOC(imageData);
             if (fileContent) {
-                const fileName : string = imageData.fileData.name.replace(/\.[^/.]+$/, '.xml');
+                const fileName: string = imageData.fileData.name.replace(/\.[^/.]+$/, '.xml');
                 try {
                     zip.file(fileName, fileContent);
                 } catch (error) {
@@ -132,7 +150,7 @@ export class RectLabelsExporter {
         });
 
         try {
-            zip.generateAsync({type:'blob'})
+            zip.generateAsync({ type: 'blob' })
                 .then(content => {
                     saveAs(content, `${ExporterUtil.getExportFileName()}.zip`);
                 });
@@ -148,7 +166,7 @@ export class RectLabelsExporter {
 
         const labelNamesList: LabelName[] = LabelsSelector.getLabelNames();
         const labelRectsString: string[] = imageData.labelRects.map((labelRect: LabelRect) => {
-            const labelName: LabelName = findLast(labelNamesList, {id: labelRect.labelId});
+            const labelName: LabelName = findLast(labelNamesList, { id: labelRect.labelId });
             const labelFields = !!labelName ? [
                 `\t<object>`,
                 `\t\t<name>${labelName.name}</name>`,
@@ -199,9 +217,11 @@ export class RectLabelsExporter {
         try {
             const contentEntries: string[] = LabelsSelector.getImagesData()
                 .map((imageData: ImageData) => {
-                    return RectLabelsExporter.wrapRectLabelsIntoCSV(imageData)})
+                    return RectLabelsExporter.wrapRectLabelsIntoCSV(imageData)
+                })
                 .filter((imageLabelData: string) => {
-                    return !!imageLabelData})
+                    return !!imageLabelData
+                })
             contentEntries.unshift(Settings.RECT_LABELS_EXPORT_CSV_COLUMN_NAMES)
 
             const content: string = contentEntries.join('\n');
@@ -219,7 +239,7 @@ export class RectLabelsExporter {
 
         const image: HTMLImageElement = ImageRepository.getById(imageData.id);
         const labelNames: LabelName[] = LabelsSelector.getLabelNames();
-        const imageSize: ISize = {width: image.width, height: image.height}
+        const imageSize: ISize = { width: image.width, height: image.height }
         const labelRectsString: string[] = imageData.labelRects
             .filter((labelRect: LabelRect) => labelRect.labelId !== null)
             .map((labelRect: LabelRect) => RectLabelsExporter.wrapRectLabelIntoCSV(
@@ -227,3 +247,20 @@ export class RectLabelsExporter {
         return labelRectsString.join('\n');
     }
 }
+
+window.addEventListener('message', (event) => {
+    const iframeData = JSON.parse(event.data);
+    if (iframeData.key == 'exportJson') {
+        const exportJson: string[] = [];
+        const labelName = LabelsSelector.getLabelNames().map(item=>item.name)
+        LabelsSelector.getImagesData().forEach((imageData: ImageData) => {
+            const fileContent: string = RectLabelsExporter.wrapRectLabelsIntoJson(imageData);
+            exportJson.push(fileContent ? fileContent : '');
+        });
+        const data = {
+            labelName,
+            exportJson
+        }
+        window.parent.postMessage(JSON.stringify(data), '*');
+    }
+});

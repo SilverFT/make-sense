@@ -70,7 +70,7 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
             }
         };
     };
-
+    //添加标签
     const addLabelNameCallback = () => {
         const newLabelNames = [
             ...labelNames,
@@ -124,7 +124,7 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                 autoFocus={true}
                 type={'text'}
                 margin={'dense'}
-                label={'Insert label'}
+                label={'插入标签'}
                 onKeyUp={onKeyUpCallback}
                 value={labelName.name}
                 onChange={onChangeCallback}
@@ -146,7 +146,7 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         </div>;
     });
 
-
+    //启动项目
     const onCreateAcceptCallback = () => {
         const nonEmptyLabelNames: LabelName[] = reject(labelNames,
             (labelName: LabelName) => labelName.name.length === 0);
@@ -202,10 +202,10 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                 <div className='Message'>
                     {
                         isUpdate ?
-                            'You can now edit the label names you use to describe the objects in the photos. Use the ' +
-                            '+ button to add a new empty text field.' :
-                            'Before you start, you can create a list of labels you plan to assign to objects in your ' +
-                            'project. You can also choose to skip that part for now and define label names as you go.'
+                            '现在，您可以编辑用于描述照片中对象的标签名称。 ' +
+                            '使用按钮添加一个新的空文本字段。' :
+                            '在开始之前，可以创建一个标签列表，这些标签计划指定给项目中的对象。' +
+                            '您也可以选择暂时跳过该部分，并在进行时定义标签名称。'
                     }
                 </div>
                 <div className='LabelsContainer'>
@@ -225,20 +225,19 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                                 alt={'upload'}
                                 src={'ico/type-writer.png'}
                             />
-                            <p className='extraBold'>Your label list is empty</p>
+                            <p className='extraBold'>您的标签列表为空</p>
                         </div>}
                 </div>
             </div>
         </div>);
     };
-
     return (
         <GenericYesNoPopup
-            title={isUpdate ? 'Edit labels' : 'Create labels'}
+            title={isUpdate ? '编辑标签' : '创建标签'}
             renderContent={renderContent}
-            acceptLabel={isUpdate ? 'Accept' : 'Start project'}
+            acceptLabel={isUpdate ? '接受' : '启动项目'}
             onAccept={isUpdate ? safeOnUpdateAcceptCallback : safeOnCreateAcceptCallback}
-            rejectLabel={isUpdate ? 'Cancel' : 'Load labels from file'}
+            rejectLabel={isUpdate ? '取消' : '从文件加载标签'}
             onReject={isUpdate ? onUpdateRejectCallback : onCreateRejectCallback}
         />);
 };

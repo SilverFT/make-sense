@@ -18,6 +18,7 @@ const EditorView: React.FC<IProps> = ({activePopupType}) => {
             'EditorView',
             {
                 'withPopup': !!activePopupType
+                // 'withPopup': !!(activePopupType == PopupWindowType.INSERT_LABEL_NAMES ? false : activePopupType)
             }
         );
     };

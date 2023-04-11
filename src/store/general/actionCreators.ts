@@ -1,9 +1,9 @@
-import {ISize} from '../../interfaces/ISize';
-import {GeneralActionTypes, ProjectData} from './types';
-import {Action} from '../Actions';
-import {PopupWindowType} from '../../data/enums/PopupWindowType';
-import {CustomCursorStyle} from '../../data/enums/CustomCursorStyle';
-import {ContextType} from '../../data/enums/ContextType';
+import { ISize } from '../../interfaces/ISize';
+import { GeneralActionTypes, ProjectData } from './types';
+import { Action } from '../Actions';
+import { PopupWindowType } from '../../data/enums/PopupWindowType';
+import { CustomCursorStyle } from '../../data/enums/CustomCursorStyle';
+import { ContextType } from '../../data/enums/ContextType';
 
 export function updateWindowSize(windowSize: ISize): GeneralActionTypes {
     return {
@@ -33,6 +33,8 @@ export function updateCustomCursorStyle(customCursorStyle: CustomCursorStyle): G
 }
 
 export function updateActiveContext(activeContext: ContextType): GeneralActionTypes {
+    // console.log('updateActiveContext', activeContext);
+
     return {
         type: Action.UPDATE_CONTEXT,
         payload: {
@@ -42,6 +44,8 @@ export function updateActiveContext(activeContext: ContextType): GeneralActionTy
 }
 
 export function updatePreventCustomCursorStatus(preventCustomCursor: boolean): GeneralActionTypes {
+    // console.log('updatePreventCustomCursorStatus', preventCustomCursor);
+
     return {
         type: Action.UPDATE_PREVENT_CUSTOM_CURSOR_STATUS,
         payload: {
@@ -51,6 +55,8 @@ export function updatePreventCustomCursorStatus(preventCustomCursor: boolean): G
 }
 
 export function updateImageDragModeStatus(imageDragMode: boolean): GeneralActionTypes {
+    // console.log('updateImageDragModeStatus', imageDragMode);
+
     return {
         type: Action.UPDATE_IMAGE_DRAG_MODE_STATUS,
         payload: {
@@ -60,6 +66,8 @@ export function updateImageDragModeStatus(imageDragMode: boolean): GeneralAction
 }
 
 export function updateCrossHairVisibleStatus(crossHairVisible: boolean): GeneralActionTypes {
+    // console.log('updateCrossHairVisibleStatus', crossHairVisible);
+
     return {
         type: Action.UPDATE_CROSS_HAIR_VISIBLE_STATUS,
         payload: {
@@ -69,6 +77,7 @@ export function updateCrossHairVisibleStatus(crossHairVisible: boolean): General
 }
 
 export function updateProjectData(projectData: ProjectData): GeneralActionTypes {
+    console.log('updateProjectData', projectData);
     return {
         type: Action.UPDATE_PROJECT_DATA,
         payload: {
