@@ -111,7 +111,7 @@ const MainView: React.FC = () => {
                     />
                 </div>
                 <div className='EditorFeaturesWrapper'>
-                    {getEditorFeatureTiles()}
+                    {/* {getEditorFeatureTiles()} */}
                 </div>
                 <div className='TriangleVertical'>
                     <div className='TriangleVerticalContent' />
@@ -127,11 +127,11 @@ const MainView: React.FC = () => {
                 <div className='SocialMediaWrapper'>
                     {getSocialMediaButtons({ width: 30, height: 30 })}
                 </div>
-                {!projectInProgress && <TextButton
+                {/* {!projectInProgress && <TextButton
                     label={'Get Started'}
                     onClick={startProject}
                     externalClassName={'get-started-button'}
-                />}
+                />} */}
             </div>
         </div>
     );

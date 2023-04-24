@@ -11,19 +11,20 @@ import { PopupWindowType } from '../../../data/enums/PopupWindowType';
 import { updateActivePopupType, updateProjectData } from '../../../store/general/actionCreators';
 import { ProjectData } from '../../../store/general/types';
 import { ImageDataUtil } from '../../../utils/ImageDataUtil';
-import { sortBy } from 'lodash';
+import { sortBy, find } from 'lodash';
 import { LabelsSelector } from '../../../store/selectors/LabelsSelector';
 import { updateLabelNames } from '../../../store/labels/actionCreators'
 import { LabelUtil } from '../../../utils/LabelUtil';
 import { LabelName } from '../../../store/labels/types';
-import {
-    updateActiveLabelId,
-    updateFirstLabelCreatedFlag,
-    updateHighlightedLabelId,
-    updateImageDataById
-} from '../../../store/labels/actionCreators';
-import { store } from '../../..';
-import { LabelRect } from '../../../store/labels/types';
+import { ImageRepository } from '../../../logic/imageRepository/ImageRepository';
+// import {
+//     updateActiveLabelId,
+//     updateFirstLabelCreatedFlag,
+//     updateHighlightedLabelId,
+//     updateImageDataById
+// } from '../../../store/labels/actionCreators';
+// import { store } from '../../..';
+// import { LabelRect } from '../../../store/labels/types';
 
 interface IProps {
     updateLabelNamesAction: (labels: LabelName[]) => any;
@@ -34,8 +35,9 @@ interface IProps {
     projectData: ProjectData;
 }
 let pushFile: File[] = [];
+let onceTag: boolean = false;
 const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
-    const [labelNames, setLabelNames] = useState(LabelsSelector.getLabelNames());
+    // const [labelNames, setLabelNames] = useState(LabelsSelector.getLabelNames());
     const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
         accept: {
             'image/*': ['.jpeg', '.png']
@@ -60,17 +62,23 @@ const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
             .then(res => res.blob())
             .then(blob => new File([blob], url, { type: blob.type }))
     }
-
+    // const injectImageDataWithAnnotations = (sourceImageData: ImageData[], annotatedImageData: ImageData[]): ImageData[] => {
+    //     return sourceImageData.map((i: ImageData) => {
+    //         const result = find(annotatedImageData, { id: i.id });
+    //         return result ? result : i;
+    //     })
+    // }
 
 
     window.addEventListener('message', (e) => {
         const iframeData = JSON.parse(e.data);
         console.log(iframeData);
 
-        if (iframeData.key == 'init') {
-
+        if (iframeData.key == 'init' && onceTag == false) {
+            onceTag = true;
             pushFile = iframeData.imgList;
             Promise.all(pushFile.map(urlToFile)).then(tempFiles => {
+
                 pushFile = tempFiles;
                 startEditor(ProjectType.OBJECT_DETECTION);
                 const labelNamesData = [];
@@ -78,24 +86,45 @@ const ImagesDropZone: React.FC<IProps> = (props: PropsWithChildren<IProps>) => {
                     labelNamesData.push(LabelUtil.createLabelName(item));
                 })
                 props.updateLabelNamesAction(labelNamesData);
-                console.log(labelNamesData);
                 props.updateActivePopupTypeAction(null)
-                console.log(iframeData);
+                const imagesData: ImageData[] = LabelsSelector.getImagesData();
+                console.log(imagesData);
+                setTimeout(() => {
+                    iframeData.rectList.forEach((item: string, index: number) => {
+                        if (item != '') {
+                            //获取图片，根据图片的宽高，计算出rect的x,y,width,height
+                            const image: HTMLImageElement = ImageRepository.getById(imagesData[index].id);
+                            const rectData = item.split('\n');
+                            imagesData[index].labelRects = rectData.map((item2: string) => {
+                                const itemRect = item2.split(' ')
+                                const labelIndex: number = parseInt(itemRect[0]);
+                                const labelId: string = labelNamesData[labelIndex].id;
+                                const rectX: number = parseFloat(itemRect[1]);
+                                const rectY: number = parseFloat(itemRect[2]);
+                                const rectWidth: number = parseFloat(itemRect[3]);
+                                const rectHeight: number = parseFloat(itemRect[4]);
+                                const rect = {
+                                    x: (rectX - rectWidth / 2) * image.width,
+                                    y: (rectY - rectHeight / 2) * image.height,
+                                    width: rectWidth * image.width,
+                                    height: rectHeight * image.height
+                                }
+                                return LabelUtil.createLabelRect(labelId, rect);
+                            })
+                            console.log(imagesData[index].labelRects);
 
-                iframeData.rectList.forEach((item: string, index: number) => {
-                    if (item != '') {
-                        const rectData = item.split('\n');
-                        console.log(rectData);
-                        rectData.forEach((item2: string) => {
-                            const itemRect = item2.split(' ')
-                            console.log(itemRect);
-                        })
-                    }
-                })
-
+                        }
+                    })
+                }, 100);
+                window.parent.postMessage('loaded', '*');
+                // const sourceImagesData = LabelsSelector.getImagesData()
+                // .map((i: ImageData) => ImageDataUtil.cleanAnnotations(i));
+                // injectImageDataWithAnnotations(sourceImagesData, imagesData), labelNames
             })
         }
     });
+
+
 
     const getDropZoneContent = () => {
         if (acceptedFiles.length === 0)

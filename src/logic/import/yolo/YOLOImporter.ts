@@ -25,7 +25,7 @@ export class YOLOImporter extends AnnotationImporter {
         try {
             const sourceImagesData = LabelsSelector.getImagesData()
                 .map((i: ImageData) => ImageDataUtil.cleanAnnotations(i));
-            const {labelNameFile, annotationFiles} = YOLOImporter.filterFilesData(filesData, sourceImagesData);
+            const { labelNameFile, annotationFiles } = YOLOImporter.filterFilesData(filesData, sourceImagesData);
             const [relevantImageData, relevantAnnotations] = YOLOImporter
                 .matchImagesWithAnnotations(sourceImagesData, annotationFiles);
             const labelNamesPromise: Promise<LabelName[]> = FileUtil.readFile(labelNameFile)
@@ -86,7 +86,7 @@ export class YOLOImporter extends AnnotationImporter {
         );
         return imageData;
     }
-
+//这段代码是我自己加的，因为我发现YOLOImporter的import方法返回的ImageData数组中的ImageData的id是不一样的，所以我加了这段代码，把返回的ImageData数组中的ImageData的id改成了和sourceImageData中的id一样
     public static injectImageDataWithAnnotations(sourceImageData: ImageData[], annotatedImageData: ImageData[]): ImageData[] {
         return sourceImageData.map((i: ImageData) => {
             const result = find(annotatedImageData, {id: i.id});
